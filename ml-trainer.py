@@ -1,3 +1,4 @@
+import os
 import argparse
 import numpy as np
 import pandas as pd
@@ -132,13 +133,18 @@ def main():
         grid_df.loc[mask, "lat"], grid_df.loc[mask, "lon"], grid_df.loc[mask, "prob"]
     )]
 
+    # Create 'maps' folder if it doesn't exist
+    os.makedirs("maps", exist_ok=True)
+
     center_lat, center_lon = df["lat"].mean(), df["lon"].mean()
     m = folium.Map(location=[center_lat, center_lon], zoom_start=3, tiles="cartodbpositron")
     HeatMap(heat_data, radius=8, blur=15, max_zoom=6).add_to(m)
 
-    m.save(args.out)
-    print(f"✅ HeatMap saved to {args.out}. File size will be much smaller and interactive!")
+    # Save map inside 'maps' folder
+    output_path = os.path.join("maps", args.out)
+    m.save(output_path)
+    print(f"✅ HeatMap saved to {output_path}. File size will be much minimal and interactive!")
+
 
 if __name__ == "__main__":
     main()
-
