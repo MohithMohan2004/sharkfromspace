@@ -1,93 +1,144 @@
-import pandas as pd
+import argparse
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import MinMaxScaler
+import pandas as pd
 import folium
-from folium import plugins
-from shapely.geometry import Point, Polygon, MultiPolygon
-from shapely.prepared import prep
+from tqdm import tqdm
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from scipy.spatial import cKDTree
 import cartopy.feature as cfeature
-from shapely.ops import unary_union
+import matplotlib.path as mpath
+from folium.plugins import HeatMap
 
-# -------------------------
-# 1. Load synthetic ocean data
-# -------------------------
-df = pd.read_csv("synthetic_ocean_data.csv")
-features = ['SST_C', 'chlor_a_mg_m3', 'ocean_depth_m', 'current_speed_m_s', 'salinity_psu']
+# -----------------------------
+# Heuristic shark probability
+# -----------------------------
+def compute_shark_probability(row):
+    sst_opt = np.exp(-((row["SST_C"] - 24.0) ** 2) / (2 * 3.0 ** 2))
+    chlor_opt = np.tanh(row["chlor_a_mg_m3"] / 2.0)
+    depth_opt = np.exp(-((row["ocean_depth_m"] - 200) ** 2) / (2 * 500 ** 2))
+    curr_opt = np.exp(-((row["current_speed_m_s"] - 0.5) ** 2) / (2 * 0.5 ** 2))
+    sal_opt = np.exp(-((row["salinity_psu"] - 35.0) ** 2) / (2 * 2.0 ** 2))
+    prob = (sst_opt + chlor_opt + depth_opt + curr_opt + sal_opt) / 5.0
+    return prob
 
-# -------------------------
-# 2. Shark probability framework
-# -------------------------
-scaler = MinMaxScaler()
-X_norm = scaler.fit_transform(df[features])
-weights = np.array([0.3, 0.2, 0.2, 0.1, 0.2])
+# -----------------------------
+# Land masking functions
+# -----------------------------
+def build_land_mask(resolution="110m"):
+    land = cfeature.NaturalEarthFeature("physical", "land", resolution)
+    polys = list(land.geometries())
+    land_paths = []
+    for poly in polys:
+        if poly.geom_type == "Polygon":
+            land_paths.append(mpath.Path(np.asarray(poly.exterior.coords)))
+        elif poly.geom_type == "MultiPolygon":
+            for subpoly in poly.geoms:
+                land_paths.append(mpath.Path(np.asarray(subpoly.exterior.coords)))
+    return land_paths
 
-# Shallower depth and lower currents = higher probability
-depth_norm = 1 - X_norm[:, 2]
-current_norm = 1 - X_norm[:, 3]
+def is_ocean_vectorized(lats, lons, land_paths):
+    mask = np.ones(len(lats), dtype=bool)
+    for path in tqdm(land_paths, desc="Masking land polygons", unit="poly"):
+        points = np.c_[lons, lats]
+        inside = path.contains_points(points)
+        mask &= ~inside
+    return mask
 
-shark_prob = (
-    weights[0]*X_norm[:,0] + 
-    weights[1]*X_norm[:,1] + 
-    weights[2]*depth_norm + 
-    weights[3]*current_norm + 
-    weights[4]*X_norm[:,4]
-)
-shark_prob = shark_prob / shark_prob.max()  # normalize 0-1
-df['shark_prob'] = shark_prob
+# -----------------------------
+# Main function
+# -----------------------------
+def main():
+    parser = argparse.ArgumentParser(description="Shark Probability HeatMap Generator")
+    parser.add_argument("--input", "-i", type=str, default="synthetic_ocean_data.csv", help="Input CSV")
+    parser.add_argument("--out", "-o", type=str, default="shark_heatmap.html", help="Output map HTML")
+    parser.add_argument("--grid_res", type=float, default=0.25, help="Grid resolution in degrees")
+    parser.add_argument("--prob_threshold", type=float, default=0.4, help="Shark probability threshold")
+    parser.add_argument("--test_size", type=float, default=0.2, help="Test fraction")
+    parser.add_argument("--n_est", type=int, default=200, help="RandomForest trees")
+    args = parser.parse_args()
 
-# -------------------------
-# 3. Train ML model
-# -------------------------
-X = df[features]
-y = df['shark_prob']
-ml_model = RandomForestRegressor(n_estimators=100, random_state=42)
-ml_model.fit(X, y)
-df['shark_prob_ml'] = ml_model.predict(X)
+    # -----------------------------
+    # Load CSV and compute heuristic probability
+    # -----------------------------
+    print(f"Loading CSV: {args.input}")
+    df = pd.read_csv(args.input)
 
-# -------------------------
-# 4. Keep only ocean points (depth > 0)
-# -------------------------
-ocean_df = df[df['ocean_depth_m'] < 0]  # negative depth underwater
+    print("Computing heuristic shark probabilities...")
+    tqdm.pandas(desc="Shark heuristic")
+    df["shark_prob"] = df.progress_apply(compute_shark_probability, axis=1)
 
-if ocean_df.empty:
-    raise ValueError("No ocean points found in the dataset.")
+    features = ["SST_C", "chlor_a_mg_m3", "ocean_depth_m", "current_speed_m_s", "salinity_psu"]
+    X = df[features]
+    y = df["shark_prob"]
 
-# -------------------------
-# 5. Prepare heatmap data
-# -------------------------
-heat_data = [[row['lat'], row['lon'], row['shark_prob_ml']**1.5] for _, row in ocean_df.iterrows()]
+    # -----------------------------
+    # Train RandomForest
+    # -----------------------------
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=42)
+    model = RandomForestRegressor(n_estimators=args.n_est, random_state=42)
+    print("Training RandomForestRegressor...")
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    mse = mean_squared_error(y_test, preds)
+    r2 = r2_score(y_test, preds)
+    print(f"Test MSE: {mse:.5f} | R^2: {r2:.3f}")
 
-# -------------------------
-# 6. Create interactive map
-# -------------------------
-map_center = [ocean_df['lat'].mean(), ocean_df['lon'].mean()]
-m = folium.Map(location=map_center, zoom_start=3, tiles='CartoDB positron')
+    # -----------------------------
+    # Build prediction grid
+    # -----------------------------
+    print("Building prediction grid...")
+    lat_min, lat_max = df["lat"].min(), df["lat"].max()
+    lon_min, lon_max = df["lon"].min(), df["lon"].max()
+    lats = np.arange(lat_min, lat_max, args.grid_res)
+    lons = np.arange(lon_min, lon_max, args.grid_res)
+    grid_lat, grid_lon = np.meshgrid(lats, lons)
+    grid_df = pd.DataFrame({"lat": grid_lat.ravel(), "lon": grid_lon.ravel()})
+    print(f"Grid points before masking: {len(grid_df)}")
 
-plugins.HeatMap(
-    heat_data,
-    min_opacity=0.3,
-    radius=25,
-    blur=35,
-    gradient={0.0: 'green', 0.5: 'yellow', 1.0: 'red'}
-).add_to(m)
+    # -----------------------------
+    # Mask land points
+    # -----------------------------
+    print("Masking land points...")
+    land_paths = build_land_mask()
+    ocean_mask = is_ocean_vectorized(grid_df["lat"].values, grid_df["lon"].values, land_paths)
+    grid_df = grid_df[ocean_mask]
+    print(f"Grid points after masking (ocean only): {len(grid_df)}")
 
-# -------------------------
-# 7. Optional: Hover tooltips for probability
-# -------------------------
-for point in heat_data:
-    lat, lon, prob = point
-    folium.CircleMarker(
-        location=[lat, lon],
-        radius=1,
-        color=None,
-        fill=False,
-        popup=f"Shark Probability: {prob:.2f}"
-    ).add_to(m)
+    # -----------------------------
+    # Assign environmental features using KDTree
+    # -----------------------------
+    print("Assigning environmental features via KDTree...")
+    tree = cKDTree(df[["lat", "lon"]].values)
+    dists, idxs = tree.query(grid_df[["lat", "lon"]].values, workers=-1)
+    X_grid = df[features].iloc[idxs].values
 
-# -------------------------
-# 8. Save map
-# -------------------------
-output_file = "interactive_shark_heatmap.html"
-m.save(output_file)
-print(f"Interactive shark heatmap saved to {output_file}")
+    # Convert to DataFrame to remove feature warning
+    X_grid_df = pd.DataFrame(X_grid, columns=features)
+
+    # -----------------------------
+    # Predict shark probability
+    # -----------------------------
+    print("Predicting shark probabilities...")
+    grid_df["prob"] = model.predict(X_grid_df)
+
+    # -----------------------------
+    # Build interactive HeatMap
+    # -----------------------------
+    print("Building interactive HeatMap...")
+    mask = grid_df["prob"] >= args.prob_threshold
+    heat_data = [[lat, lon, prob] for lat, lon, prob in zip(
+        grid_df.loc[mask, "lat"], grid_df.loc[mask, "lon"], grid_df.loc[mask, "prob"]
+    )]
+
+    center_lat, center_lon = df["lat"].mean(), df["lon"].mean()
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=3, tiles="cartodbpositron")
+    HeatMap(heat_data, radius=8, blur=15, max_zoom=6).add_to(m)
+
+    m.save(args.out)
+    print(f"✅ HeatMap saved to {args.out}. File size will be much smaller and interactive!")
+
+if __name__ == "__main__":
+    main()
+
