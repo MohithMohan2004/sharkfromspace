@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Types of Sharks</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { width:100%; height:100%; overflow-x:hidden; }
+body {
+    font-family:'Poppins', sans-serif;
+    color:#fff;
+    min-height:100vh;
+    background: url('https://imgsonica.s3.amazonaws.com/wp-content/uploads/2025/05/77355.jpg') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    padding-top: 70px;
+}
+body::before {
+    content:"";
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.4);
+    z-index:-1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius:10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+/* Navigation bar */
+nav { 
+    position: fixed; top:0; left:0; width:100%; 
+    background: rgba(0,0,0,0.2); 
+    display:flex; justify-content:flex-end; align-items:center; 
+    padding:1rem 2rem; z-index:100; 
+}
+nav a { color:#00eaff; text-decoration:none; font-weight:600; margin-left:1.5rem; transition:0.3s; }
+nav a:hover { color:#fff; text-decoration:underline; }
+
+/* Hamburger menu */
+#menu-toggle { display:flex; align-items:center; gap:10px; background:none; border:none; cursor:pointer; z-index:101; margin-right:auto; }
+#menu-toggle .hamburger { display:flex; flex-direction:column; justify-content:space-between; width:25px; height:20px; }
+#menu-toggle .hamburger span { display:block; height:3px; width:100%; background:#00eaff; border-radius:2px; transition: all 0.3s ease; }
+#menu-toggle.active .hamburger span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+#menu-toggle.active .hamburger span:nth-child(2) { opacity: 0; }
+#menu-toggle.active .hamburger span:nth-child(3) { transform: rotate(-45deg) translate(6px,-6px); }
+#menu-toggle .menu-text { font-weight:600; color:#00eaff; font-size:1rem; }
+
+/* Sidebar */
+.sidebar-menu {
+    position: fixed; top:0; left:-250px; width:220px; height:100%; 
+    background: rgba(0,50,100,0.6); backdrop-filter: blur(10px); 
+    padding:3rem 1rem; display:flex; flex-direction:column; gap:1rem; 
+    border-radius:0 20px 20px 0; transition:left 0.3s ease; z-index:99;
+}
+.sidebar-menu.show { left:0; }
+.sidebar-menu a {
+    padding:0.8rem 1rem; text-align:center; border-radius:15px; 
+    color:#fff; font-weight:600; background: linear-gradient(135deg,#0072ff,#00c6ff);
+    text-decoration:none; box-shadow:0 5px 10px rgba(0,0,0,0.3); transition: all 0.3s ease;
+}
+.sidebar-menu a:hover {
+    transform:translateY(-3px); background:linear-gradient(135deg,#00c6ff,#0072ff);
+    box-shadow:0 8px 15px rgba(0,0,0,0.5);
+}
+
+/* Main content */
+.main-content { flex:1; padding:6rem 2rem 3rem 2rem; z-index:1; position:relative; max-width:800px; margin:auto; }
+.content-container { background: rgba(0,105,148,0.3); padding:2.5rem; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(8px); margin-bottom:2rem; }
+.content-container h1 { color:#00eaff; margin-bottom:1rem; }
+.content-container p, .content-container li { color:#e0f7ff; line-height:1.8; }
+.content-container ul { padding-left:1.2rem; margin-top:1rem; }
+footer { margin-top:2rem; padding:1.2rem; background: rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.2); text-align:center; font-size:0.9rem; color:#cceeff; }
+footer span.team { font-weight:600; color:#a3f0f8; }
+</style>
+</head>
+<body>
+
+<nav>
+<button id="menu-toggle">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    <span class="menu-text">Menu</span>
+</button>
+<a href="index.html">Home</a>
+<a href="about.html">About</a>
+<a href="why.html">Why Sharks</a>
+<a href="nasa.html">NASA Data</a>
+<a href="tag.html">Next-Gen Tag</a>
+<a href="contact.html">Contact</a>
+</nav>
+
+<div class="sidebar-menu" id="sidebarMenu">
+<a href="habitat.html">Shark Habitat</a>
+<a href="types.html">Types of Sharks</a>
+<a href="migration.html">Migration Cycle</a>
+<a href="aboutus.html">About Us</a>
+</div>
+
+<div class="main-content">
+<div class="content-container">
+<h1>Types of Sharks</h1>
+<ul>
+<li><strong>Great White Shark</strong> – Apex predator in temperate oceans.</li>
+<li><strong>Hammerhead Shark</strong> – Famous for its wide head.</li>
+<li><strong>Whale Shark</strong> – The largest, but gentle giant.</li>
+<li><strong>Tiger Shark</strong> – Known for varied diet and stripes.</li>
+<li><strong>Goblin Shark</strong> – Rare deep-sea creature.</li>
+</ul>
+</div>
+
+<footer>
+&copy; 2025 Shark from Space | <span class="team">The Commit Crew</span>
+</footer>
+</div>
+
+<script>
+const menuBtn = document.getElementById('menu-toggle');
+const sidebarMenu = document.getElementById('sidebarMenu');
+menuBtn.addEventListener('click', () => {
+    menuBtn.classList.toggle('active');
+    sidebarMenu.classList.toggle('show');
+});
+</script>
+
+</body>
+</html>
