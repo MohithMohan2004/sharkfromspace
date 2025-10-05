@@ -61,14 +61,25 @@ def main():
     args = parser.parse_args()
 
     # -----------------------------
-    # Load CSV and compute heuristic probability
+    # Load CSV
     # -----------------------------
+    if not os.path.exists(args.input):
+        print(f"❌ Input CSV not found: {args.input}")
+        return
+
     print(f"Loading CSV: {args.input}")
     df = pd.read_csv(args.input)
 
+    # -----------------------------
+    # Compute heuristic probability
+    # -----------------------------
     print("Computing heuristic shark probabilities...")
-    tqdm.pandas(desc="Shark heuristic")
-    df["shark_prob"] = df.progress_apply(compute_shark_probability, axis=1)
+    try:
+        tqdm.pandas(desc="Shark heuristic")
+        df["shark_prob"] = df.progress_apply(compute_shark_probability, axis=1)
+    except:
+        # fallback if tqdm not available
+        df["shark_prob"] = df.apply(compute_shark_probability, axis=1)
 
     features = ["SST_C", "chlor_a_mg_m3", "ocean_depth_m", "current_speed_m_s", "salinity_psu"]
     X = df[features]
@@ -108,14 +119,12 @@ def main():
     print(f"Grid points after masking (ocean only): {len(grid_df)}")
 
     # -----------------------------
-    # Assign environmental features using KDTree
+    # Assign features using KDTree
     # -----------------------------
     print("Assigning environmental features via KDTree...")
     tree = cKDTree(df[["lat", "lon"]].values)
-    dists, idxs = tree.query(grid_df[["lat", "lon"]].values, workers=-1)
+    dists, idxs = tree.query(grid_df[["lat", "lon"]].values, workers=1)  # safe for older SciPy
     X_grid = df[features].iloc[idxs].values
-
-    # Convert to DataFrame to remove feature warning
     X_grid_df = pd.DataFrame(X_grid, columns=features)
 
     # -----------------------------
@@ -133,18 +142,19 @@ def main():
         grid_df.loc[mask, "lat"], grid_df.loc[mask, "lon"], grid_df.loc[mask, "prob"]
     )]
 
-    # Create 'maps' folder if it doesn't exist
-    os.makedirs("maps", exist_ok=True)
+    # Ensure output folder exists
+    output_dir = "maps"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.basename(args.out)
+    output_path = os.path.join(output_dir, output_filename)
 
     center_lat, center_lon = df["lat"].mean(), df["lon"].mean()
     m = folium.Map(location=[center_lat, center_lon], zoom_start=3, tiles="cartodbpositron")
     HeatMap(heat_data, radius=8, blur=15, max_zoom=6).add_to(m)
 
-    # Save map inside 'maps' folder
-    output_path = os.path.join("maps", args.out)
+    # Save map
     m.save(output_path)
-    print(f"✅ HeatMap saved to {output_path}. File size will be much minimal and interactive!")
-
+    print(f"HeatMap saved to {output_path} successfully!")
 
 if __name__ == "__main__":
     main()
