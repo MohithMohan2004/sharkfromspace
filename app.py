@@ -64,6 +64,16 @@ def aboutus():
     """Serve the about us page"""
     return send_file('aboutus.html')
 
+@app.route('/tracker')
+def tracker():
+    """Serve the tracker page"""
+    return send_file('tracker.html')
+
+@app.route('/tracker.html')
+def tracker_html():
+    """Serve the tracker page (HTML suffix)"""
+    return send_file('tracker.html')
+
 @app.route('/api/generate-synthetic-data', methods=['POST'])
 def generate_synthetic_data():
     """Generate synthetic ocean data"""
@@ -218,6 +228,7 @@ if __name__ == '__main__':
         print("   - / (home)")
         print("   - /about, /nasa, /tag, /why, /contact")
         print("   - /habitat, /types, /migration, /aboutus")
+        print("   - /tracker (shark tracking interface)")
         print("\n🚀 Server starting on http://localhost:5000")
     except UnicodeEncodeError:
         # Fallback for Windows console encoding issues
@@ -232,6 +243,7 @@ if __name__ == '__main__':
         print("   - / (home)")
         print("   - /about, /nasa, /tag, /why, /contact")
         print("   - /habitat, /types, /migration, /aboutus")
+        print("   - /tracker (shark tracking interface)")
         print("\nServer starting on http://localhost:5000")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
