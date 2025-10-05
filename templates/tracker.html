@@ -450,6 +450,42 @@ async function refreshHeatmapList() {
     }
 }
 
+async function displayFirstHeatmap() {
+    try {
+        const response = await fetch(`${API_BASE}/api/list-heatmaps`);
+        const result = await response.json();
+
+        const mapContainer = document.getElementById('mapDisplay');
+
+        if (result.success && result.heatmaps.length > 0) {
+            // Get the first heatmap
+            const firstHeatmap = result.heatmaps[0];
+
+            // Embed the heatmap using iframe
+            mapContainer.innerHTML = `
+                <iframe 
+                    src="${API_BASE}/api/heatmap/${firstHeatmap}" 
+                    width="100%" 
+                    height="500px" 
+                    style="border:none; border-radius:15px;">
+                </iframe>
+            `;
+        } else {
+            mapContainer.innerHTML = '<p>Generate a heatmap to see the interactive map here.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading first heatmap:', error);
+        mapContainer.innerHTML = '<p>Unable to load heatmap.</p>';
+    }
+}
+
+// Call this on page load
+document.addEventListener('DOMContentLoaded', () => {
+    showStatus('🦈 Shark Tracker loaded! Generate synthetic data and heatmaps to get started.', 'info');
+    displayFirstHeatmap(); // <-- Display the first map automatically
+});
+
+
 // Menu functionality
 const menuBtn = document.getElementById('menu-toggle');
 const sidebarMenu = document.getElementById('sidebarMenu');
