@@ -6,3 +6,7 @@ tqdm
 cartopy
 shapely
 flask
+<<<<<<< HEAD
+=======
+werkzeug
+>>>>>>> 66b676e (feat: Add Flask and Werkzeug dependencies for web server integration)
