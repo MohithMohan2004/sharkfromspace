@@ -40,19 +40,19 @@ footer { margin-top:2rem; padding:1.2rem; text-align:center; font-size:0.9rem; c
 
 <nav>
 <button id="menu-toggle"><div class="hamburger"><span></span><span></span><span></span></div><span class="menu-text">Menu</span></button>
-<a href="index.html">Home</a>
-<a href="about.html">About</a>
-<a href="why.html">Why Sharks</a>
-<a href="nasa.html">NASA Data</a>
-<a href="tag.html">Next-Gen Tag</a>
-<a href="contact.html">Contact</a>
+<a href="{{ url_for('index') }}">Home</a>
+<a href="{{ url_for('about') }}">About</a>
+<a href="{{ url_for('why') }}">Why Sharks</a>
+<a href="{{ url_for('nasa') }}">NASA Data</a>
+<a href="{{ url_for('tag') }}">Next-Gen Tag</a>
+<a href="{{ url_for('contact') }}">Contact</a>
 </nav>
 
 <div class="sidebar-menu" id="sidebarMenu">
-<a href="habitat.html">Shark Habitat</a>
-<a href="types.html">Types of Sharks</a>
-<a href="migration.html">Migration Cycle</a>
-<a href="aboutus.html">About Us</a>
+<a href="{{ url_for('habitat') }}">Shark Habitat</a>
+<a href="{{ url_for('types') }}">Types of Sharks</a>
+<a href="{{ url_for('migration') }}">Migration Cycle</a>
+<a href="{{ url_for('aboutus') }}">About Us</a>
 </div>
 
 <div class="main-content">

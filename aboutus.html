@@ -33,9 +33,15 @@ body::before {
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
 /* Navigation bar */
-nav { position:fixed; top:0; left:0; width:100%; background:transparent; display:flex; justify-content:flex-end; align-items:center; padding:1rem 2rem; z-index:100; }
+nav { 
+    position: fixed; top:0; left:0; width:100%; 
+    background: rgba(0,0,0,0.2); 
+    display:flex; justify-content:flex-end; align-items:center; 
+    padding:1rem 2rem; z-index:100; 
+}
 nav a { color:#00eaff; text-decoration:none; font-weight:600; margin-left:1.5rem; transition:0.3s; }
 nav a:hover { color:#fff; text-decoration:underline; }
+
 /* Hamburger menu */
 #menu-toggle { display:flex; align-items:center; gap:10px; background:none; border:none; cursor:pointer; z-index:101; margin-right:auto; }
 #menu-toggle .hamburger { display:flex; flex-direction:column; justify-content:space-between; width:25px; height:20px; }
@@ -80,19 +86,19 @@ footer span.team { font-weight:600; color:#a3f0f8; }
     <div class="hamburger"><span></span><span></span><span></span></div>
     <span class="menu-text">Menu</span>
 </button>
-<a href="index.html">Home</a>
-<a href="about.html">About</a>
-<a href="why.html">Why Sharks</a>
-<a href="nasa.html">NASA Data</a>
-<a href="tag.html">Next-Gen Tag</a>
-<a href="contact.html">Contact</a>
+<a href="{{ url_for('index') }}">Home</a>
+<a href="{{ url_for('about') }}">About</a>
+<a href="{{ url_for('why') }}">Why Sharks</a>
+<a href="{{ url_for('nasa') }}">NASA Data</a>
+<a href="{{ url_for('tag') }}">Next-Gen Tag</a>
+<a href="{{ url_for('contact') }}">Contact</a>
 </nav>
 
 <div class="sidebar-menu" id="sidebarMenu">
-<a href="habitat.html">Shark Habitat</a>
-<a href="types.html">Types of Sharks</a>
-<a href="migration.html">Migration Cycle</a>
-<a href="aboutus.html">About Us</a>
+<a href="{{ url_for('habitat') }}">Shark Habitat</a>
+<a href="{{ url_for('types') }}">Types of Sharks</a>
+<a href="{{ url_for('migration') }}">Migration Cycle</a>
+<a href="{{ url_for('aboutus') }}">About Us</a>
 </div>
 
 <div class="main-content">
@@ -107,16 +113,14 @@ footer span.team { font-weight:600; color:#a3f0f8; }
       • Gowtham YK — <a href="mailto:gowthamkmg886@gmail.com">gowthamkmg886@gmail.com</a><br>
       • Kaviya U — <a href="mailto:kaviyasandiya@gmail.com">kaviyasandiya@gmail.com</a><br>
       • Sarisha P — <a href="mailto:4ranserr@gmail.com">4ranserr@gmail.com</a><br>
-       • Khushi Kalidevapura Pradeep — <a href="khushikp05@gmail.com ">khushikp05@gmail.com </a>
+      • Khushi Kalidevapura Pradeep — <a href="mailto:khushikp05@gmail.com">khushikp05@gmail.com</a>
     </p>
   </div>
 </div>
 
-
 <footer>
 &copy; 2025 Shark from Space | <span class="team">The Commit Crew</span>
 </footer>
-</div>
 
 <script>
 const menuBtn = document.getElementById('menu-toggle');
@@ -129,4 +133,3 @@ menuBtn.addEventListener('click', () => {
 
 </body>
 </html>
-

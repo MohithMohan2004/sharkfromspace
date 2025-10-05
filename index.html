@@ -14,9 +14,11 @@ body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius:10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
 nav { position:fixed; top:0; left:0; width:100%; background:transparent; display:flex; justify-content:flex-end; align-items:center; padding:1rem 2rem; z-index:100; }
 nav a { color:#00eaff; text-decoration:none; font-weight:600; margin-left:1.5rem; transition:0.3s; }
 nav a:hover { color:#fff; text-decoration:underline; }
+
 #menu-toggle { display:flex; align-items:center; gap:10px; background:none; border:none; cursor:pointer; z-index:101; margin-right:auto; }
 #menu-toggle .hamburger { display:flex; flex-direction:column; justify-content:space-between; width:25px; height:20px; }
 #menu-toggle .hamburger span { display:block; height:3px; width:100%; background:#00eaff; border-radius:2px; transition:0.3s; }
@@ -24,61 +26,76 @@ nav a:hover { color:#fff; text-decoration:underline; }
 #menu-toggle.active .hamburger span:nth-child(2) { opacity:0; }
 #menu-toggle.active .hamburger span:nth-child(3) { transform:rotate(-45deg) translate(6px,-6px); }
 #menu-toggle .menu-text { font-weight:600; color:#00eaff; font-size:1rem; }
+
 .sidebar-menu { position:fixed; top:0; left:-250px; width:220px; height:100%; background: rgba(0,50,100,0.6); backdrop-filter:blur(10px); padding:3rem 1rem; display:flex; flex-direction:column; gap:1rem; border-radius:0 20px 20px 0; transition:0.3s; z-index:99; }
 .sidebar-menu.show { left:0; }
 .sidebar-menu a { padding:0.8rem 1rem; text-align:center; border-radius:15px; color:#fff; font-weight:600; background:linear-gradient(135deg,#0072ff,#00c6ff); text-decoration:none; box-shadow:0 5px 10px rgba(0,0,0,0.3); transition:all 0.3s; }
 .sidebar-menu a:hover { transform:translateY(-3px); background:linear-gradient(135deg,#00c6ff,#0072ff); box-shadow:0 8px 15px rgba(0,0,0,0.5); }
+
 .main-content { flex:1; padding:6rem 2rem 3rem 2rem; z-index:1; position:relative; max-width:800px; margin:auto; }
 header { height:50vh; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:2rem; }
 header .hero-text { max-width:800px; z-index:1; }
 header h1 { font-size:3rem; margin-bottom:1rem; color:#00eaff; text-shadow:2px 2px 6px rgba(0,0,0,0.6); }
 header p { font-size:1.2rem; line-height:1.6; color:#f0f0f0; text-shadow:1px 1px 4px rgba(0,0,0,0.4); }
+
 .content-container { background: rgba(0,105,148,0.3); padding:2.5rem; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(8px); margin-bottom:2rem; }
 .content-container p { font-size:1.2rem; line-height:1.8; color:#e0f7ff; }
+
 footer { margin-top:2rem; padding:1.2rem; background: rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.2); text-align:center; font-size:0.9rem; color:#cceeff; }
 footer span.team { font-weight:600; color:#a3f0f8; }
 </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
 <nav>
-<button id="menu-toggle"><div class="hamburger"><span></span><span></span><span></span></div><span class="menu-text">Menu</span></button>
-<a href="index.html">Home</a>
-<a href="about.html">About</a>
-<a href="why.html">Why Sharks</a>
-<a href="nasa.html">NASA Data</a>
-<a href="tag.html">Next-Gen Tag</a>
-<a href="contact.html">Contact</a>
+    <button id="menu-toggle">
+        <div class="hamburger"><span></span><span></span><span></span></div>
+        <span class="menu-text">Menu</span>
+    </button>
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('why') }}">Why Sharks</a>
+    <a href="{{ url_for('nasa') }}">NASA Data</a>
+    <a href="{{ url_for('tag') }}">Next-Gen Tag</a>
+    <a href="{{ url_for('tracker') }}">Shark Tracker</a>
+    <a href="{{ url_for('contact') }}">Contact</a>
 </nav>
 
+<!-- SIDEBAR -->
 <div class="sidebar-menu" id="sidebarMenu">
-<a href="habitat.html">Shark Habitat</a>
-<a href="types.html">Types of Sharks</a>
-<a href="migration.html">Migration Cycle</a>
-<a href="aboutus.html">About Us</a>
+    <a href="{{ url_for('habitat') }}">Shark Habitat</a>
+    <a href="{{ url_for('types') }}">Types of Sharks</a>
+    <a href="{{ url_for('migration') }}">Migration Cycle</a>
+    <a href="{{ url_for('aboutus') }}">About Us</a>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="main-content">
 <header>
-<div class="hero-text">
-<h1>Sharks from Space 🦈</h1>
-<p>Tracking sharks from orbit using NASA satellites and innovative tags to predict foraging hotspots in real time.</p>
-</div>
+    <div class="hero-text">
+        <h1>Sharks from Space 🦈</h1>
+        <p>Tracking sharks from orbit using NASA satellites and innovative tags to predict foraging hotspots in real time.</p>
+    </div>
 </header>
 
 <div class="content-container">
-<p>Welcome to the Sharks from Space Project!. we are a group of students working on detection of shark habits, tracking their migration habits and species with the help of a tracker in the form of a tag. feel free to explore! </p>
+    <p>Welcome to the Sharks from Space Project! We are a group of students working on detection of shark habits, tracking their migration and species with the help of a tracker in the form of a tag. Feel free to explore!</p>
 </div>
 
 <footer>
-&copy; 2025 Shark from Space Project | Designed by <span class="team">The Commit Crew🔥</span>
+    &copy; 2025 Shark from Space Project | Designed by <span class="team">The Commit Crew🔥</span>
 </footer>
 </div>
 
 <script>
+// Sidebar toggle
 const menuBtn = document.getElementById('menu-toggle');
 const sidebarMenu = document.getElementById('sidebarMenu');
-menuBtn.addEventListener('click', () => { menuBtn.classList.toggle('active'); sidebarMenu.classList.toggle('show'); });
+menuBtn.addEventListener('click', () => {
+    menuBtn.classList.toggle('active');
+    sidebarMenu.classList.toggle('show');
+});
 </script>
 
 </body>
